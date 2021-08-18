@@ -1,0 +1,10 @@
+main: com.bfg.veo.Main
+version: 1.0.0
+name: BossFightPlugin
+commands:
+    setup:
+        aliases: []
+        description: Setup command for the Herobrine Boss.
+    startboss:
+        aliases: [sb]
+        description: Starts the Herobrine Boss.

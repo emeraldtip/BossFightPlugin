@@ -1,0 +1,23 @@
+FloorX1: 0
+FloorY1: 0
+FloorZ1: 0
+
+FloorX2: 0
+FloorY2: 0
+FloorZ2: 0
+
+AreaX1: 0
+AreaY1: 0
+AreaZ1: 0
+
+AreaX2: 0
+AreaY2: 0
+AreaZ2: 0
+
+StartX: 0
+StartY: 0
+StartZ: 0
+
+Delay: 1
+
+world: 'world'
