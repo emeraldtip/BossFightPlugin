@@ -1,5 +1,7 @@
 package com.bfg.veo;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,7 +20,11 @@ public class Main extends JavaPlugin {
 		
 		this.getCommand("startboss").setExecutor(new StartCommand());
 		this.getCommand("setup").setExecutor(new SetupCommand());
-		this.getConfig().options().copyDefaults();
+		File configFile;
+		configFile = new File(getDataFolder(), "config.yml");
+		if(!configFile.exists()){
+			this.getConfig().options().copyDefaults();
+		}
 		saveDefaultConfig();
 		Bukkit.getPluginManager().registerEvents(new Listeners(), this);
 		main = this;
@@ -31,6 +37,7 @@ public class Main extends JavaPlugin {
 	
 	public void onDisable() {
 		
+		Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "function herobrine:remove/all_models");
 		Sequences.reset();
 		System.out.println("Reset successful!");
 		

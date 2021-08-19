@@ -37,7 +37,7 @@ public class Listeners implements Listener {
 		
 	}
 	
-	@SuppressWarnings({"deprecation"})
+	//@SuppressWarnings({"deprecation"})
 	@EventHandler
 	public void onSelect(PlayerInteractEvent event) {
 		
@@ -122,18 +122,18 @@ public class Listeners implements Listener {
 	public void onDamageByEntity(EntityDamageByEntityEvent event) {
 		
 		if (BossFight.running) {
-		
+			
 			if (event.getEntity() instanceof Player) {
 				
 				Player player = (Player) event.getEntity();
-				if (Bukkit.getOnlinePlayers().contains(player)) {
-					
-					BossFight.bossHealth += event.getDamage() / 2;
-					new RandomFlyAwayParticle(new ZParticle(Particles.HEART, player.getLocation().add(0, 1.5, 0), 1, new double[]{0.1, 0.1, 0.1}), 5);
-					double p = BossFight.bossHealth / 2500 * 100;
-					BossFight.bossBar.setProgress(p / 100);
-					
+				BossFight.bossHealth += event.getDamage() / 2;
+				if (BossFight.bossHealth > 2500)
+				{
+					BossFight.bossHealth = 2500;
 				}
+				new RandomFlyAwayParticle(new ZParticle(Particles.HEART, player.getLocation().add(0, 1.5, 0), 1, new double[]{0.1, 0.1, 0.1}), 5);
+				double p = BossFight.bossHealth / 2500;
+				BossFight.bossBar.setProgress(p);
 				
 			} else if (event.getEntity().equals(BossFight.getBossHitbox())) {
 				
@@ -142,7 +142,7 @@ public class Listeners implements Listener {
 				if (event.getDamager() instanceof Player) {
 					
 					MovementManager.targetPlayer = (Player) event.getDamager();
-					Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
+					Bukkit.getScheduler().runTaskLaterAsynchronously(Main.getMain(), new Runnable() {
 						
 						public void run() {
 							
@@ -155,8 +155,18 @@ public class Listeners implements Listener {
 					}, 600L);
 				
 				}
-				double p = BossFight.bossHealth / 2500 * 100;
-				BossFight.bossBar.setProgress(p / 100);
+				Bukkit.getPlayer("Emerald_tip").sendMessage("health1:" + BossFight.bossHealth);
+				if(BossFight.bossHealth > 2500)
+				{
+					BossFight.bossHealth = 2500;
+				}
+				if(BossFight.bossHealth < 1)
+				{
+					BossFight.bossHealth = 1;
+				}
+				double p = BossFight.bossHealth / 2500;
+				BossFight.bossBar.setProgress(p);
+				
 				
 			}
 		

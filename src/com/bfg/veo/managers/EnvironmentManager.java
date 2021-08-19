@@ -657,7 +657,7 @@ public class EnvironmentManager {
 			
 	}
 	
-	@SuppressWarnings("deprecation")
+	//@SuppressWarnings("deprecation")
 	public static void spawnFallingBlock(Location loc) {
 		
 		Block block = Bukkit.getWorld(world).getBlockAt(loc);

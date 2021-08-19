@@ -7,7 +7,7 @@ public class FunctionManager {
 	
 	public static void runFunction(String function, Entity entity) {
 		
-		Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "execute as " + entity.getUniqueId().toString() + " at " + entity.getUniqueId().toString() + " run function herobrine:" + function);
+		Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "execute as @e[tag=aj.herobrine.root_entity] at @s run function herobrine:" + function);
 		
 	}
 

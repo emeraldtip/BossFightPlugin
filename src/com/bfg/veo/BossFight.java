@@ -33,6 +33,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
@@ -50,6 +51,8 @@ import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_16_R3.Particles;
 
 public class BossFight {
+	
+	private static BukkitTask yes;
 	
 	private static int time = 0, healthLoop = 0, effectLoop = 0, healthLoops = 0;
 	public static double bossHealth = 2500, defaultHealth = 2500, effectRadius = 0.5, dY = 0, prevY = 0; // i should stop doing this...
@@ -88,11 +91,17 @@ public class BossFight {
 		FunctionManager.runFunction("summon_model", boss);
 		MovementManager.initMovement();
 		MovementManager.inAnimation = true;
+		BossFight.running = true;
 		
 		effectRadius = 0;
 		effectLoop = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
 			
 			public void run() {
+				
+				if (!running)
+				{
+					Bukkit.getScheduler().cancelTask(effectLoop);
+				}
 				
 				floatCloud.update(Particles.CLOUD, new Location(Bukkit.getWorld(Main.world), 0, -10, 0), 10, new double[]{0.7, 0.3, 0.7});
 				
@@ -133,7 +142,7 @@ public class BossFight {
 						
 					}
 					exceptions.add(bossHitbox);
-					targets.addAll(Bukkit.getOnlinePlayers());
+					targets.addAll(Bukkit.getWorld("world").getPlayers());
 					for (Player current : Bukkit.getOnlinePlayers()) {
 						
 						bossBar.addPlayer(current);
@@ -141,14 +150,13 @@ public class BossFight {
 					}
 					
 					explodeFireballs();
-					BossFight.running = true;
+					
 					MovementManager.inAnimation = false;
 					
 					Bukkit.getScheduler().cancelTask(effectLoop);
 					effectRadius = 0.5;
 					
 				}
-				
 			}
 			
 		}, 120L, 1L);
@@ -157,10 +165,13 @@ public class BossFight {
 	
 	public static void pulsate() {
 		
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
+		yes = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
 			
 			public void run() {
-				
+				if (!running)
+				{
+					yes.cancel();
+				}
 				for (Fireball fireball : fireballs) {
 					
 					fireballTime.put(fireball, fireballTime.get(fireball) + 1);
@@ -345,10 +356,12 @@ public class BossFight {
 			
 			public void run() {
 				
-				if (bossHealth <= 5 && bossHealth > -1) {
+				if (bossHealth <= 5 && bossHealth > 0) {
 					
 					death();
-					bossHealth = -1;
+					bossHealth = 0;
+					running = false;
+					
 					
 				}
 				double firstThird = defaultHealth / 3,
@@ -396,7 +409,7 @@ public class BossFight {
 						
 						if (effectRadius == 360) {
 							
-							Bukkit.getScheduler().cancelTask(effectLoop);
+							Ž
 							effectRadius = 0.5; // this is useless but idgaf
 							MovementManager.playAnimation("death");
 							bossHitbox.setGravity(true);
@@ -486,19 +499,27 @@ public class BossFight {
 						
 							effectLoop = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
 								
-								@SuppressWarnings("deprecation")
+								
 								public void run() {
 									
 									if (effectRadius != 15.0) {
 										
 										EffectManager.sphereEffect(new ZParticle(Particles.FLAME, previousLocation, 1, new double[]{0.05, 0.05, 0.05}), effectRadius);
 										for (Entity entity : bossHitbox.getNearbyEntities(effectRadius, effectRadius, effectRadius)) {
-												
-											((LivingEntity) entity).damage(((LivingEntity) entity).getHealth() / ((LivingEntity) entity).getMaxHealth() < 0.25
-													? 15 - Math.sqrt(Math.sqrt(Math.pow(bossHitbox.getLocation().getX() - entity.getLocation().getX(), 2) + Math.pow(bossHitbox.getLocation().getZ() - entity.getLocation().getZ(), 2)) + Math.pow(bossHitbox.getLocation().getY() - entity.getLocation().getY(), 2)) + 1
-													: (15 - Math.sqrt(Math.sqrt(Math.pow(bossHitbox.getLocation().getX() - entity.getLocation().getX(), 2) + Math.pow(bossHitbox.getLocation().getZ() - entity.getLocation().getZ(), 2)) + Math.pow(bossHitbox.getLocation().getY() - entity.getLocation().getY(), 2))) * 2
-													);
-											
+											if (entity instanceof Player)
+											{
+												try
+												{
+												((LivingEntity) entity).damage(((LivingEntity) entity).getHealth() / ((LivingEntity) entity).getMaxHealth() < 0.25
+														? 15 - Math.sqrt(Math.sqrt(Math.pow(bossHitbox.getLocation().getX() - entity.getLocation().getX(), 2) + Math.pow(bossHitbox.getLocation().getZ() - entity.getLocation().getZ(), 2)) + Math.pow(bossHitbox.getLocation().getY() - entity.getLocation().getY(), 2)) + 1
+														: (15 - Math.sqrt(Math.sqrt(Math.pow(bossHitbox.getLocation().getX() - entity.getLocation().getX(), 2) + Math.pow(bossHitbox.getLocation().getZ() - entity.getLocation().getZ(), 2)) + Math.pow(bossHitbox.getLocation().getY() - entity.getLocation().getY(), 2))) * 2
+														);
+												}
+												catch(Exception e)
+												{
+													Bukkit.getPlayer("Emerald_tip").sendMessage(e.getMessage());
+												}
+											}
 											// this causes performance issues
 											
 										}
@@ -553,26 +574,31 @@ public class BossFight {
 					
 					MovementManager.playAnimation("throw");
 					
-					Fireball fireball = bossHitbox.launchProjectile(Fireball.class);
-					Vector velocity = target.getLocation().toVector().subtract(bossHitbox.getLocation().toVector()).normalize();
-					fireball.setVelocity(velocity);
+					//delay so the animation plays at the correct time
 					Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
 						
 						public void run() {
+							Fireball fireball = bossHitbox.launchProjectile(Fireball.class);
+							Vector velocity = target.getLocation().toVector().subtract(bossHitbox.getLocation().toVector()).normalize();
+							fireball.setVelocity(velocity);
+							Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
+								
+								public void run() {
+									
+									fireballs.add(fireball);
+									fireballTime.put(fireball, 0);
+									
+								}
+								
+							}, 30L);
 							
-							fireballs.add(fireball);
-							fireballTime.put(fireball, 0);
-							
-						}
-						
-					}, 30L);
-					
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						
-						player.playSound(bossHitbox.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 50, 1);
-						
-					}
-					
+							for (Player player : Bukkit.getOnlinePlayers()) {
+								
+								player.playSound(bossHitbox.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 50, 1);
+								
+							}
+							}
+					}, 20L);
 				}
 				
 			}, 60L);

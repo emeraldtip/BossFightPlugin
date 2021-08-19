@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import com.bfg.veo.BossFight;
@@ -17,6 +18,7 @@ public class MovementManager {
 	
 	public static Player targetPlayer;
 	public static boolean inAnimation = false;
+	private static BukkitTask yes;
 
 	public static void initMovement() {
 		
@@ -54,11 +56,16 @@ public class MovementManager {
 	
 	private static void loopMovement() {
 		
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
-			
-			public void run() {
+		yes = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable()
+        {
+			public void run()
+			{
 				
-				boolean isThereGround = false, isThereCeiling = false;
+				if(!BossFight.running)
+				{
+					yes.cancel();
+				}
+				boolean isThereGround = false, isThereCeiling = false, tooHigh = false;
 				for (int i = 0; i <= 6; i++) {
 					
 					if (Bukkit.getWorld(Main.world).getBlockAt(BossFight.getBossHitbox().getLocation().clone().subtract(0, i, 0)).getType() != Material.AIR) {
@@ -77,7 +84,27 @@ public class MovementManager {
 					}
 					
 				}
-				if (isThereGround && isThereCeiling) {
+				if (BossFight.getBossHitbox().getLocation().getY() > Main.getMain().getConfig().getDouble("StartY")+20)
+				{
+					tooHigh = true;
+				}
+				else
+				{
+					tooHigh = false;
+				}
+				if (BossFight.getBossHitbox().getLocation().getY() > Main.getMain().getConfig().getDouble("StartY")+40)
+				{
+					BossFight.getBossHitbox().setVelocity(new Vector(0,
+							-5, 
+							0));
+				}
+				else if (!isThereGround && tooHigh)
+				{
+					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
+							(0 - Math.random()) / 2,
+							(Math.random() - Math.random()) / 2));
+				}
+				else if (isThereGround && isThereCeiling) {
 					
 					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
 							0,
@@ -111,7 +138,7 @@ public class MovementManager {
 	
 	private static void loopFacing() {
 		
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
+Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
 			
 			public void run() {
 				
@@ -138,9 +165,9 @@ public class MovementManager {
 				
 				float yaw = (float) (Math.atan2(dz, dx) * (180 / Math.PI));
 				Location loc = BossFight.getBossHitbox().getLocation().clone();
-				loc.setYaw(yaw + 90);
+				loc.setYaw(yaw - 90);
 				BossFight.getBossHitbox().teleport(loc);
-				BossFight.getBossHitbox().setRotation((int) yaw, 0);
+				BossFight.getBossHitbox().setRotation((int) yaw-90, 0);
 				
 			}
 			

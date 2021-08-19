@@ -34,14 +34,14 @@ public class ConfigManager {
 	public static void editLocs(String name, String value) {
 		
 		Main.getMain().getConfig().set(name, Double.parseDouble(value));
-		Main.getMain().saveDefaultConfig();
+		Main.getMain().saveConfig();
 		
 	}
 	
 	public static void editWorld(String name, String value) {
 		
 		Main.getMain().getConfig().set(name, value);
-		Main.getMain().saveDefaultConfig();
+		Main.getMain().saveConfig();
 		
 	}
 

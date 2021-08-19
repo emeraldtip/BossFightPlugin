@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.bfg.veo.BossFight;
 import com.bfg.veo.Main;
 import com.bfg.veo.managers.ConfigManager;
+import com.bfg.veo.managers.MovementManager;
 import com.bfg.veo.managers.Sequences;
 
 import net.md_5.bungee.api.ChatColor;
@@ -125,9 +126,32 @@ public class SetupCommand implements CommandExecutor {
 							BossFight.a5();
 							
 							break;
-						
+					
 						}
+				case "animate":
+					
+					String f = args[2];
+					switch (f) {
+					
+					case "throw":
 						
+						MovementManager.playAnimation("throw");
+						
+						break;
+						
+					case "death":
+						
+						MovementManager.playAnimation("death");
+						
+						break;
+						
+					case "heal":
+						
+						MovementManager.playAnimation("heal");
+						
+						break;
+						
+					}
 						break;
 						
 					default:
