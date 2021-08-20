@@ -18,7 +18,7 @@ public class MovementManager {
 	
 	public static Player targetPlayer;
 	public static boolean inAnimation = false;
-	private static BukkitTask yes;
+	private static BukkitTask yes, yes2, yes3;
 
 	public static void initMovement() {
 		
@@ -33,18 +33,19 @@ public class MovementManager {
 	
 	private static void loopCatchUp() {
 		
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
+		yes2 = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
 			
 			public void run() {
-					
+				if (!BossFight.running)
+				{
+					yes2.cancel();
+				}
 				BossFight.getBoss().teleport(BossFight.getBossHitbox());
 				BossFight.floatCloud.update(null, BossFight.getBossHitbox().getLocation().subtract(0, 0.5, 0), 0, null);
 				
 				if (!inAnimation) {
 				
-					FunctionManager.runFunction("animations/animation.herobrine.recover/reset", BossFight.getBoss());
 					FunctionManager.runFunction("animations/animation.herobrine.throw/reset", BossFight.getBoss());
-					FunctionManager.runFunction("animations/animation.herobrine.recover/reset", BossFight.getBoss());
 				
 				}
 				
@@ -55,15 +56,14 @@ public class MovementManager {
 	}
 	
 	private static void loopMovement() {
-		
-		yes = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable()
+		yes3 = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable()
         {
 			public void run()
 			{
 				
 				if(!BossFight.running)
 				{
-					yes.cancel();
+					yes3.cancel();
 				}
 				boolean isThereGround = false, isThereCeiling = false, tooHigh = false;
 				for (int i = 0; i <= 6; i++) {
@@ -137,42 +137,46 @@ public class MovementManager {
 	}
 	
 	private static void loopFacing() {
-		
-Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
-			
-			public void run() {
+		if (BossFight.running)
+		{
+			yes = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
 				
-				double dx, // this is so stupid aaaaa
-				dz; // aAAAAAAAAAAAAA
-				if (BossFight.getBossHitbox().getLocation().getX() < targetPlayer.getLocation().getX()) {
+				public void run() {
+					if(!BossFight.running)
+					{
+						yes.cancel();
+					}
+					double dx, // this is so stupid aaaaa
+					dz; // aAAAAAAAAAAAAA
+					if (BossFight.getBossHitbox().getLocation().getX() < targetPlayer.getLocation().getX()) {
+						
+						dx = Math.abs(targetPlayer.getLocation().getX()) - Math.abs(BossFight.getBossHitbox().getLocation().getX());
+						
+					} else {
+						
+						dx = 0 - (Math.abs(BossFight.getBossHitbox().getLocation().getX()) - Math.abs(targetPlayer.getLocation().getX()));
+						
+					}
+					if (BossFight.getBossHitbox().getLocation().getZ() < targetPlayer.getLocation().getZ()) {
+						
+						dz = Math.abs(targetPlayer.getLocation().getZ()) - Math.abs(BossFight.getBossHitbox().getLocation().getZ());
+						
+					} else {
+						
+						dz = 0 - (Math.abs(BossFight.getBossHitbox().getLocation().getZ()) - Math.abs(targetPlayer.getLocation().getZ()));
+						
+					} //yes i know this is useless my brain is small so ignore me
 					
-					dx = Math.abs(targetPlayer.getLocation().getX()) - Math.abs(BossFight.getBossHitbox().getLocation().getX());
-					
-				} else {
-					
-					dx = 0 - (Math.abs(BossFight.getBossHitbox().getLocation().getX()) - Math.abs(targetPlayer.getLocation().getX()));
+					float yaw = (float) (Math.atan2(dz, dx) * (180 / Math.PI));
+					Location loc = BossFight.getBossHitbox().getLocation().clone();
+					loc.setYaw(yaw - 90);
+					BossFight.getBossHitbox().teleport(loc);
+					BossFight.getBossHitbox().setRotation((int) yaw-90, 0);
 					
 				}
-				if (BossFight.getBossHitbox().getLocation().getZ() < targetPlayer.getLocation().getZ()) {
-					
-					dz = Math.abs(targetPlayer.getLocation().getZ()) - Math.abs(BossFight.getBossHitbox().getLocation().getZ());
-					
-				} else {
-					
-					dz = 0 - (Math.abs(BossFight.getBossHitbox().getLocation().getZ()) - Math.abs(targetPlayer.getLocation().getZ()));
-					
-				} //yes i know this is useless my brain is small so ignore me
 				
-				float yaw = (float) (Math.atan2(dz, dx) * (180 / Math.PI));
-				Location loc = BossFight.getBossHitbox().getLocation().clone();
-				loc.setYaw(yaw - 90);
-				BossFight.getBossHitbox().teleport(loc);
-				BossFight.getBossHitbox().setRotation((int) yaw-90, 0);
-				
-			}
-			
-		}, 0L, 1L);
-		
+			}, 0L, 1L);
+		}
 	}
 	
 	public static void playAnimation(String animation) {

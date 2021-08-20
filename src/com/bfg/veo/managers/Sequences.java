@@ -32,9 +32,8 @@ public class Sequences {
 		
 		BossFight.running = false;
 		BossFight.bossBar.removeAll();
-		Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "function herobrine:remove/all_models:");
 		BossFight.floatCloud.kill();
-		EnvironmentManager.resetFloor();
+		//EnvironmentManager.resetFloor();
 		//Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "plugman reload BossFightPlugin");
 		//Bukkit.getPluginManager().disablePlugin(Main.getMain());
 		

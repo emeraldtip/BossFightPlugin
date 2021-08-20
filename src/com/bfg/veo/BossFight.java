@@ -52,9 +52,9 @@ import net.minecraft.server.v1_16_R3.Particles;
 
 public class BossFight {
 	
-	private static BukkitTask yes;
+	private static BukkitTask yes, splosion, herobrian;
 	
-	private static int time = 0, healthLoop = 0, effectLoop = 0, healthLoops = 0;
+	private static int time = 0, healthLoop = 0, effectLoop = 0, healthLoops = 0, bruh = 0, bruh2 = 0;
 	public static double bossHealth = 2500, defaultHealth = 2500, effectRadius = 0.5, dY = 0, prevY = 0; // i should stop doing this...
 	public static boolean running = false;
 	public static List<Fireball> fireballs = new ArrayList<>();
@@ -352,11 +352,15 @@ public class BossFight {
 			}
 				
 		}, 0L, 20L);
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
+		bruh = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
 			
 			public void run() {
-				
+				if (!running)
+				{
+					Bukkit.getScheduler().cancelTask(bruh);
+				}
 				if (bossHealth <= 5 && bossHealth > 0) {
+					
 					
 					death();
 					bossHealth = 0;
@@ -385,7 +389,6 @@ public class BossFight {
 		}, 0L, 1L);
 		
 	}
-	
 	public static void death() {
 		
 		for (Player current : Bukkit.getOnlinePlayers()) {
@@ -396,57 +399,76 @@ public class BossFight {
 		Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
 			
 			public void run() {
-				
+				Location bosslocation = boss.getLocation();
 				effectRadius = 0; // im not using this as a radius in this case buuuuuuut it does its job c:
-				effectLoop = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getMain(), new Runnable() {
-						
+				splosion = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
+				boolean bruh = false;
 					public void run() {
-							
 						Bukkit.getWorld(Main.world).createExplosion(new Location(Bukkit.getWorld(Main.world),
-								bossHitbox.getLocation().getX() + Math.sin(effectRadius) * 10,
-								bossHitbox.getLocation().getY(),
-								bossHitbox.getLocation().getZ() + Math.cos(effectRadius) * 10), 1, false);
-						
-						if (effectRadius == 360) {
-							
-							Ž
-							effectRadius = 0.5; // this is useless but idgaf
-							MovementManager.playAnimation("death");
-							bossHitbox.setGravity(true);
-							floatCloud.kill();
-							
-							ArmorStand sword = (ArmorStand) Bukkit.getWorld(Main.world).spawnEntity(bossHitbox.getLocation().add(0, 10, 0), EntityType.ARMOR_STAND);
-							sword.setInvisible(true);
-							sword.setInvulnerable(true);
-							sword.setArms(true);
-							sword.setRightArmPose(new EulerAngle(Math.toRadians(90), Math.toRadians(270), Math.toRadians(0)));
-							sword.getEquipment().setItemInMainHand(new ItemStack(Material.DIAMOND_SWORD));
-							while (bossHitbox.isOnGround()) {
-								
-								sword.teleport(bossHitbox.getLocation().subtract(0, 1, 0)); //check for offset when im home :)
-								for (Entity player : bossHitbox.getNearbyEntities(20, 10, 20)) {
-									
-									if (player instanceof Player) {
-										
-										((Player) player).playSound(bossHitbox.getLocation(), Sound.BLOCK_ANVIL_LAND, 20, 1);
-										
+								boss.getLocation().getX() + Math.sin(effectRadius) * 10,
+								boss.getLocation().getY(),
+								boss.getLocation().getZ() + Math.cos(effectRadius) * 10), 1, false);
+								effectRadius++;
+								boss.teleport(bosslocation);
+								if (effectRadius >= 75 && bruh == false)
+								{
+									Bukkit.getScheduler().cancelTask(effectLoop);
+									Bukkit.getPlayer("Emerald_tip").sendMessage("bruhh");
+									splosion.cancel();
+									floatCloud.kill();
+									Sequences.end();
+									//TODO why is this thing so fast it's kinda weird?
+									boss.setVelocity(new Vector(0,-0.01,0));
+									bruh = true;
+									herobrian = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
+										public void run() {
+											Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(),"execute as @e[type=minecraft:armor_stand,tag=aj.herobrine.root_entity] at @s run function herobrine:animations/animation.herobrine.death/reset");
+											if (boss.isOnGround()) {
+												herobrian.cancel();
+											}
+										}
+									}, 0L, 2L);
+									ArmorStand sword = (ArmorStand) Bukkit.getWorld(Main.world).spawnEntity(boss.getLocation().add(0, 10, 0), EntityType.ARMOR_STAND);
+									sword.setInvisible(true);
+									sword.setInvulnerable(true);
+									sword.setArms(true);
+									sword.setRightArmPose(new EulerAngle(Math.toRadians(90), Math.toRadians(270), Math.toRadians(0)));
+									sword.getEquipment().setItemInMainHand(new ItemStack(Material.DIAMOND_SWORD));
+									herobrian = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
+										public void run() {
+											if (boss.isOnGround()) {
+												
+												sword.setVelocity(new Vector(0,-1,0));
+												for (Entity player : bossHitbox.getNearbyEntities(20, 10, 20)) {
+													
+													if (player instanceof Player) {
+														
+														((Player) player).playSound(bossHitbox.getLocation(), Sound.BLOCK_ANVIL_LAND, 20, 1);
+														
+													}
+														
+												}
+											}
+											//TODO TMRW check why this thing doesn't run add a debugger yse
+											if(sword.getLocation().getY()-boss.getLocation().getY() < 3)
+											{
+												Bukkit.getPlayer("Emerald_tip").sendMessage("bruh");
+												Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "function herobrine:remove/all_models");
+												BossFight.getBoss().remove();
+												BossFight.getBossHitbox().remove();
+												herobrian.cancel();
+												
+											}
+												
+										}
+									}, 0L, 2L);
+
+										}
 									}
-									
-								}
-								break;
-								
-							}
-							
-							Sequences.end();
-							
-						}
-						effectRadius++;
-							
-					}
-						
 				}, 0L, 2L);
 				
 			}
+			
 			
 		}, 100L);
 		
