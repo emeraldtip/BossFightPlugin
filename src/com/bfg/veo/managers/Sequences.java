@@ -20,7 +20,6 @@ public class Sequences {
 			public void run() {
 				
 				BossFight.spawn(x, y, z);
-				BossFight.pulsate();
 				
 			}
 			

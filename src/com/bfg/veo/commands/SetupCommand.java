@@ -157,7 +157,14 @@ public class SetupCommand implements CommandExecutor {
 					default:
 						
 						break;
-					
+					case "heal":
+						
+						BossFight.heal(false);
+						break;
+					case "healeffect":
+						
+						BossFight.heal(true);
+						break;
 					}
 					
 					break;
@@ -169,6 +176,7 @@ public class SetupCommand implements CommandExecutor {
 					break;
 				
 				}
+			
 				
 			} else {
 				

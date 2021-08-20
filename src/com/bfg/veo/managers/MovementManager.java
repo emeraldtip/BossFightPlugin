@@ -17,8 +17,9 @@ import com.bfg.veo.Main;
 public class MovementManager {
 	
 	public static Player targetPlayer;
-	public static boolean inAnimation = false;
-	private static BukkitTask yes, yes2, yes3;
+	public static boolean inAnimation = false, bruh = false;
+	private static BukkitTask yes, yes2, yes3, healing;
+	private static int counter = 0;
 
 	public static void initMovement() {
 		
@@ -65,71 +66,76 @@ public class MovementManager {
 				{
 					yes3.cancel();
 				}
-				boolean isThereGround = false, isThereCeiling = false, tooHigh = false;
-				for (int i = 0; i <= 6; i++) {
-					
-					if (Bukkit.getWorld(Main.world).getBlockAt(BossFight.getBossHitbox().getLocation().clone().subtract(0, i, 0)).getType() != Material.AIR) {
-						
-						isThereGround = true;
-						
-					}
-					
-				}
-				for (int i = 0; i <= 6; i++) {
-					
-					if (Bukkit.getWorld(Main.world).getBlockAt(BossFight.getBossHitbox().getLocation().clone().add(0, i, 0)).getType() != Material.AIR) {
-						
-						isThereCeiling = true;
-						
-					}
-					
-				}
-				if (BossFight.getBossHitbox().getLocation().getY() > Main.getMain().getConfig().getDouble("StartY")+20)
+				if(!inAnimation)
 				{
-					tooHigh = true;
-				}
-				else
-				{
-					tooHigh = false;
-				}
-				if (BossFight.getBossHitbox().getLocation().getY() > Main.getMain().getConfig().getDouble("StartY")+40)
-				{
-					BossFight.getBossHitbox().setVelocity(new Vector(0,
-							-5, 
-							0));
-				}
-				else if (!isThereGround && tooHigh)
-				{
-					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
-							(0 - Math.random()) / 2,
-							(Math.random() - Math.random()) / 2));
-				}
-				else if (isThereGround && isThereCeiling) {
 					
-					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
-							0,
-							(Math.random() - Math.random()) / 2));
-					
-				} else if (isThereGround && !isThereCeiling) {
-					
-					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
-							Math.random() / 2,
-							(Math.random() - Math.random()) / 2));
-					
-				} else if (!isThereGround && isThereCeiling) {
-					
-					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
-							(0 - Math.random() / 2),
-							(Math.random() - Math.random()) / 2));
-					
-				} else {
-					
-					BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
-							(Math.random() - Math.random()) / 2,
-							(Math.random() - Math.random()) / 2));
-					
-				}
 				
+					boolean isThereGround = false, isThereCeiling = false, tooHigh = false;
+					for (int i = 0; i <= 6; i++) {
+						
+						if (Bukkit.getWorld(Main.world).getBlockAt(BossFight.getBossHitbox().getLocation().clone().subtract(0, i, 0)).getType() != Material.AIR) {
+							
+							isThereGround = true;
+							
+						}
+						
+					}
+					for (int i = 0; i <= 6; i++) {
+						
+						if (Bukkit.getWorld(Main.world).getBlockAt(BossFight.getBossHitbox().getLocation().clone().add(0, i, 0)).getType() != Material.AIR) {
+							
+							isThereCeiling = true;
+							
+						}
+						
+					}
+					if (BossFight.getBossHitbox().getLocation().getY() > Main.getMain().getConfig().getDouble("StartY")+20)
+					{
+						tooHigh = true;
+					}
+					else
+					{
+						tooHigh = false;
+					}
+					if (BossFight.getBossHitbox().getLocation().getY() > Main.getMain().getConfig().getDouble("StartY")+40)
+					{
+						BossFight.getBossHitbox().setVelocity(new Vector(0,
+								-5, 
+								0));
+					}
+					else if (!isThereGround && tooHigh)
+					{
+						BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
+								(0 - Math.random()) / 2,
+								(Math.random() - Math.random()) / 2));
+					}
+					else if (isThereGround && isThereCeiling) {
+						
+						BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
+								0,
+								(Math.random() - Math.random()) / 2));
+						
+					} else if (isThereGround && !isThereCeiling) {
+						
+						BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
+								Math.random() / 2,
+								(Math.random() - Math.random()) / 2));
+						
+					} else if (!isThereGround && isThereCeiling) {
+						
+						BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
+								(0 - Math.random() / 2),
+								(Math.random() - Math.random()) / 2));
+						
+					} else {
+						
+						BossFight.getBossHitbox().setVelocity(new Vector((Math.random() - Math.random()) / 2,
+								(Math.random() - Math.random()) / 2,
+								(Math.random() - Math.random()) / 2));
+						
+					}
+				
+			}
 			}
 			
 		}, 200L, 200L);
@@ -181,74 +187,79 @@ public class MovementManager {
 	
 	public static void playAnimation(String animation) {
 		
-		inAnimation = true;
-		switch (animation) {
 		
-		case "throw":
+
+			switch (animation) {
 			
-			FunctionManager.runFunction("animations/animation.herobrine.throw/start", BossFight.getBoss());
-			Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
-				
-				public void run() {
-					
-					inAnimation = false;
-					FunctionManager.runFunction("animations/animation.herobrine.throw/reset", BossFight.getBoss());
-					
-				}
-				
-			}, 69L);
-			
-			break;
-			
-		case "death":
-			
-			FunctionManager.runFunction("animations/animation.herobrine.death/start", BossFight.getBoss());
-			Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
-				
-				public void run() {
-					
-					inAnimation = false;
-					FunctionManager.runFunction("animations/animation.herobrine.death/reset", BossFight.getBoss());
-					
-				}
-				
-			}, 69L);
-			
-			break;
-			
-		case "heal":
-			
-			FunctionManager.runFunction("animations/animation.herobrine.recover/start", BossFight.getBoss());
-			BossFight.getBossHitbox().setVelocity(new Vector(0, 5, 0));
-			for (int i = -180; i <= 180; i += 10) {
-				
-				final int yaw = i;
+			case "throw":
+				inAnimation = true;
+				FunctionManager.runFunction("animations/animation.herobrine.throw/start", BossFight.getBoss());
 				Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
 					
 					public void run() {
 						
-						BossFight.getBossHitbox().setRotation(yaw, 0);
+						inAnimation = false;
+						FunctionManager.runFunction("animations/animation.herobrine.throw/reset", BossFight.getBoss());
 						
 					}
 					
-				}, 1L);
+				}, 69L);
 				
-			}
-			Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
+				break;
 				
-				public void run() {
-							
-					inAnimation = false;
-					FunctionManager.runFunction("animations/animation.herobrine.recover/reset", BossFight.getBoss());
+			case "death":
+				inAnimation = true;
+				FunctionManager.runFunction("animations/animation.herobrine.death/start", BossFight.getBoss());
+				Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
+					
+					public void run() {
 						
-				}
+						inAnimation = false;
+						FunctionManager.runFunction("animations/animation.herobrine.death/reset", BossFight.getBoss());
+						
+					}
+					
+				}, 69L);
 				
-			}, 69L);
+				break;
+				
+			case "heal":
+				counter = 0;
+				inAnimation = true;
+				BossFight.getBossHitbox().setVelocity(new Vector(0, 0.1, 0));
+				BossFight.getBoss().setVelocity(new Vector(0, 0.1, 0));
+				healing = Bukkit.getScheduler().runTaskTimer(Main.getMain(), new Runnable() {
+					public void run() {
+						FunctionManager.runFunction("animations/animation.herobrine.recover/loop", BossFight.getBoss());
+						counter++;
+						if (counter >= 33 && !bruh)
+						{
+							BossFight.getBossHitbox().setVelocity(new Vector(0, 0.5, 0));
+							BossFight.getBoss().setVelocity(new Vector(0, 0.5, 0));
+							bruh = true;
+						}
+						if (counter >= 70)
+						{
+							healing.cancel();
+						}
+					}
+				}, 0, 1L);
+				Bukkit.getScheduler().runTaskLater(Main.getMain(), new Runnable() {
+					public void run() {
+								
+						inAnimation = false;
+						FunctionManager.runFunction("animations/animation.herobrine.recover/reset", BossFight.getBoss());
+							
+					}
+					
+				}, 60L);
+				
+				break;
 			
-			break;
-		
+			}
+			
 		}
 		
-	}
+	
 	
 }

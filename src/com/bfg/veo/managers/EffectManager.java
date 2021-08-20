@@ -4,10 +4,12 @@ import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
+import com.bfg.veo.BossFight;
 import com.bfg.veo.Main;
 import com.bfg.veo.objs.ZParticle;
 
@@ -20,7 +22,8 @@ public class EffectManager {
 	
 	private static HashMap<String[], String> titles = new HashMap<>();
 	private static int[] lengths = {0, 0};
-	private static int loop;
+	private static double[][] coordinates;
+	private static int loop, arrayLocation = 0;
 	
 	public static void displayText(Player player, String title, String subtitle) {
 		
@@ -68,36 +71,50 @@ public class EffectManager {
 		
 	}
 	
-	public static void circleEffect(ZParticle particle, double radius) {
-		
-		Location center = particle.getLocation();
-		for (int i = 0; i <= 360; i++) {
-			
-			particle.setLocation(new Location(Bukkit.getWorld(Main.world),
-					center.getX() + Math.sin(i) * radius,
-					center.getY(),
-					center.getZ() + Math.cos(i) * radius));
-			particle.playParticle(true, null);
-			
+	public static void circleEffect(Particle particle, double radius, Location location) {
+		coordinates = new double[11 + 10 * 2][];
+		for (double i = 0; i <= Math.PI; i += Math.PI / 10) {
+			double radiuss = Math.sin(i+radius);
+			double y = 0;
+			for (double a = 0; a < Math.PI * 2; a+= Math.PI / 10) {
+			      double x = Math.cos(a) * radiuss;
+			      double z = Math.sin(a) * radiuss;
+			      location.add(x, y, z);
+			      for(Player p : Bukkit.getWorld("world").getPlayers())
+			      {
+			    	  p.spawnParticle(particle, location, 0, 0,0,0);
+			      }
+			      location.subtract(x, y, z);
+			}
 		}
-		
 	}
 	
-	public static void sphereEffect(ZParticle particle, double radius) {
-		
-		for (int i = 0; i <= 90; i++) {
+	public static void sphereEffect(Particle particle, double radius) {
+		Location location = BossFight.getBoss().getLocation();
+		coordinates = new double[11 + 10 * 2][];
+		for (double i = 0; i <= Math.PI; i += Math.PI / 10) {
+			double radiuss = Math.sin(i+radius);
+			double y = Math.cos(i+radius);
+			for (double a = 0; a < Math.PI * 2; a+= Math.PI / 10) {
+			      double x = Math.cos(a) * radiuss;
+			      double z = Math.sin(a) * radiuss;
+			      location.add(x, y, z);
+			      for(Player p : Bukkit.getWorld("world").getPlayers())
+			      {
+			    	  p.spawnParticle(particle, location, 1);
+			      }
+			      location.subtract(x, y, z);
+			      
+			   }
+			//coordinates[arrayLocation++] = new double[] { x, y, z };
 			
-			circleEffect(new ZParticle(particle.getParticle(),
-					new Location(Bukkit.getWorld(Main.world), particle.getLocation().getX(), particle.getLocation().getY() + Math.sin(i) * radius, particle.getLocation().getZ()),
-					particle.getCount(),
-					particle.getOffset()),
-					Math.cos(i) * radius);
+	/*		
 			circleEffect(new ZParticle(particle.getParticle(),
 					new Location(Bukkit.getWorld(Main.world), particle.getLocation().getX(), particle.getLocation().getY() - Math.sin(i) * radius, particle.getLocation().getZ()),
 					particle.getCount(),
 					particle.getOffset()),
 					Math.cos(i) * radius);
-			
+	 */
 		}
 		
 	}
