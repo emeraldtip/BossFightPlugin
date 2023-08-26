@@ -12,4 +12,4 @@ In case I do something in the future with it, here are some problems that need s
 3. Make the animation position refresher inside the actual mcfunction to reduce console spam
 4. Rework particle system
 5. Look over the main loops and things
-6. Step 1: die
+6. Step 1: don't die (don't do it man, it gets better)
